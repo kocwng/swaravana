@@ -9,6 +9,7 @@ import { Pelacak } from './pelacak.js';
 import { svgGitar, svgPiano } from './gambar-diagram.js';
 import { Koleksi } from './koleksi.js';
 import { bentukGitar, SENAR_STANDAR } from './diagram.js';
+import { susunPemula } from './pemula.js';
 
 const $ = (id) => document.getElementById(id);
 /** Perangkat sentuh (HP/tablet): petunjuk keyboard diganti "ketuk pad". Fungsi, supaya ikut berubah bila perangkat berganti mode. */
@@ -46,6 +47,8 @@ const keadaan = {
   sentuhan: Number(localStorageAman('akor.sentuhan')) || 0.45, // default lembut: dipetik pelan
   // cara memilih akor di kamera: 'kombinasi' (1 atau 2 jari, tangan diam), 'tinggi' (tinggi tangan = baris), 'utama' (5 akor saja)
   // (kunci simpan .v2: mode "bentuk" jadi bawaan baru, pilihan lama tidak menimpanya)
+  // mode pemula: pad hanya berisi akor dari sheet/progresi yang dimuat, tangan kiri tidak dipakai
+  pemula: localStorageAman('akor.pemula') === '1',
   modeKamera: ['bentuk', 'kombinasi', 'tinggi', 'utama'].includes(localStorageAman('akor.modeKamera.v2')) ? localStorageAman('akor.modeKamera.v2') : 'bentuk',
 };
 let pemicu = keadaan.modeKamera === 'kombinasi' ? pemicuKombinasi : pemicuSatu;
@@ -56,6 +59,22 @@ function localStorageAman(k, v) {
 }
 
 const jumlahKiri = () => keadaan.kiriKeyboard ?? keadaan.kiriKamera;
+
+/** Mode pemula sedang berlaku: dinyalakan dan ada sheet/progresi yang akornya sudah dipasang di pad. */
+const pemulaAktif = () => Boolean(keadaan.pemula && keadaan.latihan?.slotPemula && Object.keys(keadaan.latihan.slotPemula).length);
+/** Isi pad (baris, jari) di mode pemula, atau null (pad kosong / mode biasa). */
+const slotPemula = (baris, jari) => (pemulaAktif() ? keadaan.latihan.slotPemula[`${baris}:${jari}`] ?? null : null);
+/** Akor sebuah pad. Mode pemula: akor sheet yang dipasang di pad itu (tangan kiri diabaikan), null bila kosong. */
+function akorPad(jari, kiri, baris) {
+  if (!pemulaAktif()) return akorUntuk(jari, keadaan.kunci, kiri, baris);
+  const s = slotPemula(baris, jari);
+  return s ? akorUntuk(s.sumber.jari, keadaan.kunci, s.sumber.kiri, s.sumber.baris) : null;
+}
+/** Nama yang ditampilkan di pad / overlay: mode pemula memakai ejaan seperti tertulis di sheet. */
+function namaPad(jari, kiri, baris) {
+  if (!pemulaAktif()) return akorUntuk(jari, keadaan.kunci, kiri, baris).nama;
+  return slotPemula(baris, jari)?.nama ?? '–';
+}
 /** Pergeseran bunyi (semitone) dari capo + tuning. */
 const geserBunyi = () => transposisi(keadaan.capo, keadaan.tuning);
 const kunciTerdengar = () => (((keadaan.kunci + geserBunyi()) % 12) + 12) % 12;
@@ -579,6 +598,11 @@ const tombolPad = Object.fromEntries(NAMA_BARIS.map((baris) => {
   el.pad.append(div);
   return [baris, tombol];
 }));
+const lencanaPemula = document.createElement('span');
+lencanaPemula.className = 'lencana-pemula';
+lencanaPemula.textContent = 'Pemula';
+lencanaPemula.hidden = true;
+barisPad.tengah.querySelector('.label-baris').append(lencanaPemula);
 const semuaPad = () => NAMA_BARIS.flatMap((b) => tombolPad[b].map((t, j) => [b, j, t]));
 
 // ------------------------------------------------------------------ suara & petikan
@@ -607,15 +631,18 @@ function petik(jari, kekuatanMentah, kiri = jumlahKiri(), baris = keadaan.barisK
   const kekuatan = Math.min(1, kekuatanMentah * keadaan.sentuhan / 0.8);
   // genjreng panjang: dari Shift+huruf, atau tombol ✦ Panjang yang "disiapkan" untuk petikan berikutnya
   const klimaks = panjang || keadaan.panjangSiap;
+  const a = akorPad(jari, kiri, baris);
+  if (!a) return; // mode pemula: pad kosong
+  if (pemulaAktif()) kiri = null; // akor sudah lengkap, tangan kiri tidak dipakai
   if (keadaan.panjangSiap) aturPanjangSiap(false);
-  const a = akorUntuk(jari, keadaan.kunci, kiri, baris);
   // Latihan lagu: bila akor ini cocok dengan target, pakai ejaan & nada bas yang tertulis
   // (akor slash seperti F#7/A# dimainkan dengan bas A#).
   const T = keadaan.putarOtomatis ? targetMentah() : targetLatihan();
   const cocok = T && a.akar === T.akar && a.kualitas === T.kualitas;
   // "kurang itu lebih": beri tahu pemutar apakah akor ini ujung kalimat (akor terakhir baris sheet)
   pemutar.akhirKalimat = cocok ? Boolean(T.akhirBaris) : null;
-  const bas = cocok && T.bas != null ? T.bas : a.akar;
+  // mode pemula: pad akor slash (C/G) memakai bas yang tertulis di sheet
+  const bas = cocok && T.bas != null ? T.bas : (slotPemula(baris, jari)?.bas ?? a.akar);
   const v = voicingBunyi(a, bas);
   if (klimaks) {
     // sapuan pelan yang dibiarkan bergaung; pola (bila jalan) masuk jeda supaya tidak memotong
@@ -623,8 +650,9 @@ function petik(jari, kekuatanMentah, kiri = jumlahKiri(), baris = keadaan.barisK
     pemutar.genjrengPanjang(v, Math.max(kekuatan, 0.85));
   } else { pemutar.senar = senarBunyi(a); pemutar.mainkan(v, kekuatan, mulai); } // gitar: genjreng/petik; piano: iringan
   keadaan.nyala.set(`${baris}:${jari}`, performance.now());
-  el.akorBesar.textContent = cocok ? T.main : a.nama;
-  tampilkanCaraMain({ a, nama: cocok ? T.main : a.nama, baris, jari, kiri, bas, v });
+  const nama = cocok ? T.main : namaPad(jari, kiri, baris);
+  el.akorBesar.textContent = nama;
+  tampilkanCaraMain({ a, nama, baris, jari, kiri, bas, v });
   el.akorBesar.classList.remove('denyut');
   void el.akorBesar.offsetWidth; // ulang animasi
   el.akorBesar.classList.add('denyut');
@@ -712,6 +740,15 @@ function hitungTarget() {
     const a = akorUntuk(t.jari, keadaan.kunci, t.kiri, t.baris);
     Object.assign(t, { akar: a.akar, kualitas: a.kualitas });
   }
+  // mode pemula: akor-akor unik dipasang langsung di pad (yang paling sering di baris utama)
+  L.slotPemula = null;
+  L.penuhPemula = 0;
+  if (keadaan.pemula) {
+    const p = susunPemula(L.target);
+    L.target = p.target;
+    L.slotPemula = p.slot;
+    L.penuhPemula = p.penuh;
+  }
   L.i = Math.min(L.i, L.target.length - 1);
   lewatiYangTakBisa();
   gambarLembar();
@@ -774,13 +811,15 @@ function senarBunyi(a) {
 /** Beri tahu pemutar akor berikutnya (dari sheet/latihan) supaya isian bisa "berjalan" ke sana. */
 function aturAkorBerikut(T) {
   if (!T || T.jari === null || T.jari === undefined) { pemutar.voicingBerikut = null; return; }
-  const a = akorUntuk(T.jari, keadaan.kunci, T.kiri, T.baris);
+  const a = akorPad(T.jari, T.kiri, T.baris);
+  if (!a) { pemutar.voicingBerikut = null; return; }
   pemutar.voicingBerikut = voicingBunyi(a, T.bas ?? a.akar);
 }
 
 async function dengarkanAkor(t, span) {
   await pastikanSuara();
-  const a = akorUntuk(t.jari, keadaan.kunci, t.kiri, t.baris);
+  const a = akorPad(t.jari, t.kiri, t.baris);
+  if (!a) return;
   const v = voicingBunyi(a, t.bas ?? a.akar);
   pemutar.senar = senarBunyi(a);
   pemutar.mainkan(v, keadaan.sentuhan);
@@ -792,7 +831,7 @@ async function dengarkanAkor(t, span) {
   pemutar.akhirKalimat = Boolean(t.akhirBaris);
   el.akorBesar.textContent = t.main;
   tampilkanCaraMain({ a, nama: t.main, baris: t.baris, jari: t.jari, kiri: t.kiri, bas: t.bas ?? a.akar, v });
-  el.akorSub.textContent = kalimat([`Dari sheet: ${petunjukKanan(t)}`, petunjukKiri(t.kiri)]);
+  el.akorSub.textContent = kalimat([`Dari sheet: ${petunjukKanan(t)}`, pemulaAktif() ? '' : petunjukKiri(t.kiri)]);
   span.classList.add('dengar');
   setTimeout(() => span.classList.remove('dengar'), 400);
   const b = tombolPad[t.baris][t.jari];
@@ -823,7 +862,7 @@ function isiCara(tempat, daftar, { a, nama, baris, jari, kiri, bas, v }, kecil =
     tambah('piano', 'Piano', '<span class="cara-warna bas"></span>bas <span class="cara-warna"></span>nada akor');
   }
   tambah('kamera', 'Kamera', langkahKamera(baris, jari));
-  if (!(kecil && kiri === null)) tambah('tangan', 'Tangan kiri', kiri === null ? 'Tidak perlu, dipilih otomatis' : kiri === 0 ? 'Kepalkan' : `Tunjukkan ${kiri} jari`);
+  if (!(kecil && kiri === null) && !pemulaAktif()) tambah('tangan', 'Tangan kiri', kiri === null ? 'Tidak perlu, dipilih otomatis' : kiri === 0 ? 'Kepalkan' : `Tunjukkan ${kiri} jari`);
   const tombol = TOMBOL_BARIS[baris][jari];
   // perangkat sentuh tidak punya keyboard: baris ini disembunyikan
   if (!layarSentuh()) {
@@ -862,7 +901,8 @@ function tampilkanBerikut(T) {
   const kotak = document.getElementById('cara-berikut');
   berikutTerakhir = T ?? null;
   if (!T || T.jari === null || T.jari === undefined) { kotak.hidden = true; return; }
-  const a = akorUntuk(T.jari, keadaan.kunci, T.kiri, T.baris);
+  const a = akorPad(T.jari, T.kiri, T.baris);
+  if (!a) { kotak.hidden = true; berikutTerakhir = null; return; } // pad sudah tidak berisi akor itu
   const bas = T.bas ?? a.akar;
   const g = geserBunyi();
   kotak.hidden = false;
@@ -941,13 +981,14 @@ function gambarLembar() {
   document.getElementById('judul-lagu').textContent = L.judul;
   document.getElementById('pakai-saran').hidden = !L.saran;
   document.getElementById('aksi-koleksi').hidden = !L.koleksiId;
-  const takBisa = L.target.filter((t) => t.jari === null).length;
+  const takBisa = L.target.filter((t) => t.jari === null && !t.penuh).length;
+  const penuh = L.penuhPemula ? ` ${L.penuhPemula} akor tidak muat di pad dan dilewati.` : '';
   const g = geserBunyi();
   const bunyi = g ? `, capo ${keadaan.capo}${tuningDenganId(keadaan.tuning).geser ? `, tuning ${tuningDenganId(keadaan.tuning).nama.split(' · ')[0].toLowerCase()}` : ''}, terdengar di ${namaKunciLengkap(kunciTerdengar())}` : '';
   const beda = L.kunciHeader != null && L.kunciHeader !== kunciTerdengar() && L.kunciHeader !== (kunciTerdengar() + 9) % 12
     ? ` Sheet aslinya di kunci ${namaKunciLengkap(L.kunciHeader)}.` : '';
   document.getElementById('info-lagu').textContent =
-    `${L.info} Dimainkan di kunci ${namaKunci(keadaan.kunci)}${bunyi}.${beda}${takBisa ? ` ${takBisa} akor tidak dikenali dan dilewati.` : ''}`;
+    `${L.info} Dimainkan di kunci ${namaKunci(keadaan.kunci)}${bunyi}.${beda}${takBisa ? ` ${takBisa} akor tidak dikenali dan dilewati.` : ''}${penuh}`;
   let n = 0;
   const isi = [];
   for (const b of L.sheet.baris) {
@@ -964,7 +1005,7 @@ function gambarLembar() {
       s.dataset.n = n++;
       if (t.jari !== null) s.addEventListener('click', () => dengarkanAkor(t, s));
       s.textContent = a.teks;
-      s.title = t.jari === null ? 'Akor tidak dikenali' : `${petunjukKanan(t)}, ${petunjukKiri(t.kiri)}${t.tepat ? '' : ` (dimainkan ${t.main})`}`;
+      s.title = t.penuh ? 'Tidak muat di pad (mode pemula)' : t.jari === null ? 'Akor tidak dikenali' : `${petunjukKanan(t)}${pemulaAktif() ? '' : `, ${petunjukKiri(t.kiri)}`}${t.tepat ? '' : ` (dimainkan ${t.main})`}`;
       if (t.jari === null) s.classList.add('tak');
       else if (!t.tepat) s.classList.add('kira');
       div.append(s);
@@ -1008,13 +1049,13 @@ function perbaruiLatihan() {
   const tombolKiri = T.kiri === null || sentuh ? '' : ` <kbd>tahan ${T.kiri}</kbd>`;
   tampilkanBerikut(T);
   el.target.innerHTML = `<span class="label-target">Berikutnya</span><b>${T.main}</b>`
-    + `<span class="langkah-target"><span class="tak-putus">${petunjukKanan(T)}${tombolKanan}</span>, <span class="tak-putus">${petunjukKiri(T.kiri)}${tombolKiri}</span></span>${catatan}`;
+    + `<span class="langkah-target"><span class="tak-putus">${petunjukKanan(T)}${tombolKanan}</span>${pemulaAktif() ? '' : `, <span class="tak-putus">${petunjukKiri(T.kiri)}${tombolKiri}</span>`}</span>${catatan}`;
   if (L.jenis === 'progresi') {
     el.urutan.hidden = false;
     el.urutan.replaceChildren(...L.target.map((t, i) => {
       const s = document.createElement('span');
       s.innerHTML = `${t.main}<small>${t.romawi ?? ''}</small>`;
-      s.title = `${petunjukKanan(t)}, ${petunjukKiri(t.kiri)}`;
+      s.title = pemulaAktif() ? petunjukKanan(t) : `${petunjukKanan(t)}, ${petunjukKiri(t.kiri)}`;
       if (i === L.i) s.className = 'kini';
       else if (i < L.i) s.className = 'lewat';
       return s;
@@ -1042,7 +1083,7 @@ function perbaruiLatihan() {
     const target = b === T.baris && j === T.jari;
     t.classList.toggle('target', target);
     if (!target) return;
-    t.querySelector('.nama').textContent = T.main;
+    t.querySelector('.nama').textContent = T.main.replace('/', '/\u200b');
     t.querySelector('.syarat-kiri').textContent = T.kiri === null ? '' : `+ ${petunjukKiri(T.kiri)}`;
   });
 }
@@ -1058,10 +1099,19 @@ function isiNamaPad() {
   const kiri = jumlahKiri();
   const mode = keadaan.modeKamera;
   NAMA_BARIS.forEach((b) => { barisPad[b].querySelector('.label-baris small').textContent = KET_BARIS[mode][b]; });
+  const pemula = pemulaAktif();
+  document.body.classList.toggle('pemula', pemula);
+  lencanaPemula.hidden = !pemula;
   semuaPad().forEach(([b, j, t]) => {
-    t.querySelector('.nama').textContent = akorUntuk(j, keadaan.kunci, kiri, b).nama;
+    const kosong = pemula && !slotPemula(b, j);
+    t.classList.toggle('kosong', kosong);
+    t.disabled = kosong;
+    const nama = namaPad(j, kiri, b);
+    t.querySelector('.nama').textContent = nama.replace('/', '/\u200b'); // boleh patah setelah "/" (Dadd9/ F#)
+    t.classList.toggle('nama-panjang', nama.length > 5); // ejaan sheet bisa panjang (Dadd9/F#)
     const gerak = mode === 'bentuk' ? teksBentuk(b, j) : mode === 'kombinasi' ? teksKombinasi(b, j) : JARI[j];
-    t.querySelector('.jari').textContent = `${gerak}, ${BARIS[b][j].romawi}`;
+    // mode pemula: angka romawi pad biasa tidak berlaku lagi, cukup gerakannya
+    t.querySelector('.jari').textContent = pemula ? gerak : `${gerak}, ${BARIS[b][j].romawi}`;
     t.querySelector('.syarat-kiri').textContent = '';
   });
 }
@@ -1095,9 +1145,9 @@ function isiPetaMode() {
     const kiri = jumlahKiri();
     const item = ['tengah', 'atas', 'bawah'].flatMap((b) => [0, 1, 2, 3, 4].map((j) => {
       const { ikon, isi } = ikonPeta(mode, b, j, teks(b, j));
-      return `<li${b === 'tengah' ? ' class="utama"' : ''}><i aria-hidden="true">${ikon}</i><span>${isi}</span><b>${akorUntuk(j, keadaan.kunci, kiri, b).nama}</b></li>`;
+      return `<li${b === 'tengah' ? ' class="utama"' : ''}><i aria-hidden="true">${ikon}</i><span>${isi}</span><b>${namaPad(j, kiri, b)}</b></li>`;
     }));
-    html += `<p class="judul-peta">Akor di kunci ${namaKunciLengkap(keadaan.kunci)}</p><ul class="peta">${item.join('')}</ul>`;
+    html += `<p class="judul-peta">${pemulaAktif() ? 'Akor dari sheet (mode pemula)' : `Akor di kunci ${namaKunciLengkap(keadaan.kunci)}`}</p><ul class="peta">${item.join('')}</ul>`;
   }
   tempat.innerHTML = html;
 }
@@ -1173,6 +1223,27 @@ saklarIkuti.addEventListener('change', () => {
   if (!keadaan.ikutiSheet) tampilkanBerikut(null); // main bebas: "berikutnya" muncul lagi saat akor sheet diklik
   perbaruiTampilan();
 });
+
+const saklarPemula = document.getElementById('mode-pemula');
+saklarPemula.checked = keadaan.pemula;
+saklarPemula.addEventListener('change', () => {
+  hentikanPutar();
+  keadaan.pemula = saklarPemula.checked;
+  localStorageAman('akor.pemula', keadaan.pemula ? '1' : '0');
+  tampilkanBerikut(null);
+  caraTerakhir = null;
+  if (keadaan.latihan) { Object.assign(keadaan.latihan, { i: 0, benar: 0, salah: 0 }); hitungTarget(); }
+  panaskanSampel();
+  perbaruiTampilan();
+});
+/** Keterangan saklar pemula: berapa akor yang dipasang di pad. */
+function tulisKetPemula() {
+  const ket = document.getElementById('ket-pemula');
+  const L = keadaan.latihan;
+  if (!pemulaAktif()) { ket.textContent = 'Pad cuma berisi akor dari sheet ini. Tangan kiri tidak perlu dipakai.'; return; }
+  const n = Object.keys(L.slotPemula).length;
+  ket.textContent = `${n} akor dari ${L.jenis === 'progresi' ? 'urutan ini' : 'sheet ini'} sudah dipasang di pad, yang paling sering di baris utama. Tangan kiri tidak perlu dipakai.`;
+}
 
 // ------------------------------------------------------------------ pengaturan per sheet tersimpan
 /** Semua pengaturan yang memengaruhi cara sheet dimainkan. */
@@ -1301,6 +1372,7 @@ function perbaruiTampilan() {
   el.panduan.querySelectorAll('li').forEach((li) => li.classList.toggle('aktif', li.dataset.jari === String(kiri ?? 'auto')));
   el.kiriKini.textContent = kiri === null ? 'tidak terlihat' : teksKiri(kiri);
   if (keadaan.latihan) perbaruiLatihan();
+  tulisKetPemula();
   if (typeof isiPetaMode === 'function') isiPetaMode();
 }
 
@@ -1461,7 +1533,7 @@ function gambarPasangan(lm, w, h, dpr, T, sekarang, kiri, aksen, aksen2) {
       }
       // berjarak / jempol: label diangkat lebih tinggi supaya tidak menumpuk label 1 jari
       const naik = (dekat && a > 0 ? 50 : 78) * dpr;
-      const nama = akorUntuk(jari, keadaan.kunci, kiri, baris).nama;
+      const nama = namaPad(jari, kiri, baris);
       pil((p.x + q.x) / 2, Math.min(p.y, q.y) - naik, target ? `${nama}: ${teksKombinasi(baris, jari)}` : nama, {
         latar: kilat > 0 ? aksen : target || didekati ? aksen2 : 'rgba(20,17,15,.55)',
         depan: kilat > 0 || target || didekati ? '#1a1208' : 'rgba(255,255,255,.8)',
@@ -1494,7 +1566,7 @@ function gambarBentuk(lm, w, h, dpr, T, sekarang, kiri, aksen, aksen2) {
   else if (!kini.length) teks = '✊ diam (akor ditahan)';
   else if (!pos) teks = 'bentuk tidak dipakai';
   else {
-    teks = `${teksBentuk(pos.baris, pos.jari)}: ${akorUntuk(pos.jari, keadaan.kunci, kiri, pos.baris).nama}`;
+    teks = `${teksBentuk(pos.baris, pos.jari)}: ${namaPad(pos.jari, kiri, pos.baris)}`;
     if (kilat > 0) { latar = aksen; depan = '#1a1208'; }
   }
   pil(atas.x, atas.y - 30 * dpr, teks, { latar, depan, besar: 15 * dpr });
@@ -1518,7 +1590,7 @@ function gambar() {
     ctx.font = `600 ${12 * dpr}px system-ui, sans-serif`;
     ctx.fillStyle = 'rgba(255,255,255,.45)';
     ctx.textBaseline = 'top';
-    ctx.textAlign = 'left'; ctx.fillText('Tangan kiri: jenis akor', 12 * dpr, 10 * dpr);
+    ctx.textAlign = 'left'; ctx.fillText(pemulaAktif() ? 'Tangan kiri: tidak dipakai' : 'Tangan kiri: jenis akor', 12 * dpr, 10 * dpr);
     ctx.textAlign = 'right'; ctx.fillText('Tangan kanan: akor', w - 12 * dpr, 10 * dpr);
     // zona baris akor (tinggi tangan kanan) di separuh kanan — hanya mode "tinggi tangan"
     if (keadaan.modeKamera === 'tinggi') {
@@ -1543,7 +1615,7 @@ function gambar() {
     const T = targetLatihan();
     const sekarang = performance.now();
 
-    if (keadaan.tanganKiri) {
+    if (keadaan.tanganKiri && !pemulaAktif()) {
       gambarTangan(keadaan.tanganKiri, w, h, { garis: 'rgba(95,200,180,.6)', titik: aksen2 });
       const q = keLayar(keadaan.tanganKiri[0], w, h);
       const label = kiri === null ? '…' : teksKiri(kiri);
@@ -1563,7 +1635,7 @@ function gambar() {
           ctx.fillStyle = `rgba(240,167,74,${0.55 * kilat})`;
           ctx.beginPath(); ctx.arc(q.x, q.y, (18 + 40 * (1 - kilat)) * dpr, 0, Math.PI * 2); ctx.fill();
         }
-        const nama = akorUntuk(j, keadaan.kunci, kiri, baris).nama;
+        const nama = namaPad(j, kiri, baris);
         pil(q.x, q.y - 22 * dpr, nama, {
           latar: kilat > 0 ? aksen : target ? aksen2 : `rgba(20,17,15,${0.55 + 0.35 * lurus})`,
           depan: kilat > 0 || target ? '#1a1208' : '#fff',

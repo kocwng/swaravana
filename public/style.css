@@ -236,6 +236,8 @@ h1, h2, h3, h4 { margin: 0; line-height: 1.2; }
 .pad .nama { font-size: clamp(18px, 2.5vw, 26px); font-weight: 750; letter-spacing: -.3px; line-height: 1.15; }
 .pad-baris[data-baris=tengah] button { padding: 16px 8px 12px; }
 .pad-baris[data-baris=tengah] .nama { font-size: clamp(20px, 2.8vw, 30px); }
+/* nama akor panjang dari sheet (mode pemula): kecilkan dan boleh patah di "/" supaya tidak meluber */
+.pad button.nama-panjang .nama, .pad-baris[data-baris=tengah] button.nama-panjang .nama { font-size: clamp(15px, 1.8vw, 22px); overflow-wrap: anywhere; }
 .pad-baris[data-baris=tengah] button { background: var(--permukaan-2); border-color: var(--garis); }
 .pad-baris:not([data-baris=tengah]) .nama { color: color-mix(in srgb, var(--teks) 82%, transparent); }
 /* baris atas/bawah: keterangan gerakan hanya untuk akor target, atau saat disorot */
@@ -258,6 +260,24 @@ h1, h2, h3, h4 { margin: 0; line-height: 1.2; }
 .pad button.target { border-color: var(--aksen-2); box-shadow: 0 0 0 2px color-mix(in srgb, var(--aksen-2) 35%, transparent); }
 .pad .syarat-kiri { font-size: 11px; font-weight: 700; color: var(--aksen-2-teks); min-height: 0; }
 .pad .syarat-kiri:empty { display: none; }
+/* mode pemula: pad yang tidak dipakai lagu dikosongkan */
+#pad button.kosong {
+  pointer-events: none; cursor: default; transform: none;
+  background: transparent; border: 1px dashed color-mix(in srgb, var(--redup-2) 50%, transparent); box-shadow: none;
+}
+#pad button.kosong .nama { color: var(--redup-2); font-weight: 500; }
+#pad button.kosong .jari, #pad button.kosong .kbd { opacity: .4; }
+#pad button.kosong .syarat-kiri { display: none; }
+/* lencana kecil penanda mode pemula */
+.lencana-pemula {
+  display: inline-flex; align-items: center; align-self: flex-start; gap: 4px; width: max-content; max-width: 100%;
+  padding: 2px 8px; border-radius: 999px; font: 700 10.5px/1.5 var(--font); letter-spacing: .3px; white-space: nowrap;
+  color: var(--aksen-teks); background: color-mix(in srgb, var(--aksen) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--aksen) 32%, transparent);
+}
+/* mode pemula: petunjuk tangan kiri tidak relevan */
+body.pemula #kartu-kiri,
+body.pemula .pad .syarat-kiri { display: none; }
 
 /* ------------------------------------------------------------------ panel kanan & kartu */
 .panel { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
@@ -724,6 +744,9 @@ kbd {
   .pad, .pad-baris { gap: 5px; }
   .pad-baris { grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 2px; }
   .label-baris { display: none; }
+  /* label baris tersembunyi di ponsel: tanda mode pemula dipindah ke atas pad */
+  body.pemula .pad::before { content: 'Mode pemula · akor dari sheet'; align-self: flex-start; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 650; color: var(--aksen-teks); background: color-mix(in srgb, var(--aksen) 14%, transparent); border: 1px solid color-mix(in srgb, var(--aksen) 35%, transparent); }
+  .pad button.nama-panjang .nama, .pad-baris[data-baris=tengah] button.nama-panjang .nama { font-size: 13px; letter-spacing: -.3px; }
   .pad .jari, .pad .kbd { display: none; }
   .pad button, .pad-baris[data-baris=tengah] button, .pad-baris:not([data-baris=tengah]) button { padding: 12px 4px; border-radius: 12px; }
   .akor-besar { font-size: 56px; }
