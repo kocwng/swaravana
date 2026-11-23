@@ -1,0 +1,64 @@
+# Buat GitHub Release saat tag v* di-push, misalnya:
+#   git tag -a v1.0.0 -m "Swaravana v1.0.0" && git push origin v1.0.0
+# Aset rilis: swaravana-<tag>.zip (aplikasi siap jalan offline) + file .sha256.
+# Catatan rilis diambil dari docs/CATATAN-RILIS-<tag>.md bila ada; bila tidak, dibuat otomatis oleh GitHub.
+name: Rilis
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rilis-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  rilis:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # untuk membuat release dan mengunggah aset
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Tes unit
+        run: node --test test/
+      - name: Cek offline
+        run: node scripts/cek-offline.mjs
+
+      - name: Cocokkan tag dengan versi package.json
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          versi="v$(node -p "require('./package.json').version")"
+          if [ "$versi" != "$TAG" ]; then
+            echo "::warning::Tag $TAG berbeda dengan versi package.json ($versi)"
+          fi
+
+      - name: Buat zip
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+          node scripts/buat-rilis.mjs "$TAG" dist
+
+      - name: Buat GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          catatan="docs/CATATAN-RILIS-$TAG.md"
+          if [ -f "$catatan" ]; then sumber=(--notes-file "$catatan"); else sumber=(--generate-notes); fi
+          pra=()
+          case "$TAG" in *-*) pra=(--prerelease) ;; esac
+          gh release create "$TAG" \
+            "dist/swaravana-$TAG.zip" \
+            "dist/swaravana-$TAG.zip.sha256" \
+            --title "Swaravana $TAG" \
+            --verify-tag \
+            "${sumber[@]}" "${pra[@]}"
