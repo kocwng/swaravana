@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Swaravana · main gitar & piano cukup dengan jari</title>
+  <meta name="description" content="Main gitar dan piano cukup dengan jari di depan kamera. Tangan kanan memilih akor, tangan kiri mengubah jenisnya. Jalan offline, tanpa akun.">
+  <meta property="og:title" content="Swaravana">
+  <meta property="og:description" content="Main gitar dan piano cukup dengan jari di depan kamera. Jalan offline, tanpa akun.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://swaravana.kusumalab.host/">
+  <meta property="og:image" content="https://swaravana.kusumalab.host/brand/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#120f0d" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f4ede4" media="(prefers-color-scheme: light)">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; connect-src 'self'; worker-src 'self' blob:">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/ikon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="kepala">
+    <div class="merek">
+      <span class="lencana-logo"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true" fill="currentColor"><path d="M11.14 24.26L5.68 20.25A2.27 2.27 0 1 0 3.88 24.31L10.51 25.68A0.8 0.8 0 0 0 11.14 24.26Z"/><path d="M13.74 21.85L7.34 8.62A2.39 2.39 0 1 0 3.31 11.14L12.4 22.69A0.8 0.8 0 0 0 13.74 21.85Z"/><path d="M16.32 21.29L15.88 3.65A2.51 2.51 0 1 0 10.91 4.26L14.75 21.48A0.8 0.8 0 0 0 16.32 21.29Z"/><path d="M18.8 21.84L24.95 7.15A2.39 2.39 0 1 0 20.4 5.75L17.28 21.38A0.8 0.8 0 0 0 18.8 21.84Z"/><path d="M20.83 23.37L29.16 16A2.27 2.27 0 1 0 25.77 13.05L19.63 22.33A0.8 0.8 0 0 0 20.83 23.37Z"/><circle cx="16.27" cy="27.4" r="3.8" fill="#5fd0bb"/></svg></span>
+      <div>
+        <h1>Swaravana</h1>
+        <p>Tangan kanan memilih akor, tangan kiri mengubah jenisnya.</p>
+      </div>
+    </div>
+    <div class="kanan-kepala">
+      <button type="button" class="tombol kecil-tombol" id="tombol-kamera-kepala" hidden>Nyalakan kamera</button>
+      <button type="button" class="tombol kecil-tombol" id="tombol-matikan-kamera" hidden>Matikan kamera</button>
+      <div class="lencana" id="status" role="status">Belum mulai</div>
+    </div>
+  </header>
+
+  <main class="tata">
+    <section class="panggung" aria-label="Panggung kamera">
+      <div class="layar" id="layar">
+        <video id="video" playsinline muted></video>
+        <canvas id="kanvas" aria-hidden="true"></canvas>
+        <div class="layar-mati" id="layar-mati">
+          <svg class="ikon-kamera" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l1.6-2h6.8L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zm8 3.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6z" fill="currentColor"/></svg>
+          <div class="teks-mati"><b>Kamera mati</b><span>Main pakai keyboard atau ketuk pad di bawah. Nyalakan kamera untuk main dengan tangan.</span></div>
+          <button type="button" class="tombol utama" id="tombol-kamera-panggung">Nyalakan kamera</button>
+        </div>
+        <div class="sambutan" id="sambutan">
+          <div class="sambutan-isi">
+            <p class="sambutan-label">Jalan offline, tanpa alat musik, tanpa akun</p>
+            <h2>Gitar &amp; piano <span>tanpa alat</span></h2>
+            <p class="sambutan-sub">Bentuk jari di depan kamera jadi akor. Pola genjreng & iringannya jalan sendiri.</p>
+            <ol class="langkah">
+              <li>
+                <span class="langkah-no">1</span>
+                <h3>Tangan kanan <em>memilih akor</em></h3>
+                <p>Mulai dari kepalan, lalu keluarkan jari.</p>
+                <div class="chip-baris" aria-label="Contoh di kunci C">
+                  <span class="chip"><i>☝️</i>C</span><span class="chip"><i>✌️</i>F</span><span class="chip"><i>3</i>G</span><span class="chip"><i>4</i>Am</span><span class="chip"><i>🖐️</i>Dm</span>
+                </div>
+                <p class="langkah-catatan">👍 🤘 🤙 dan bentuk lain untuk akor sisanya, termasuk kres &amp; mol.</p>
+              </li>
+              <li>
+                <span class="langkah-no">2</span>
+                <h3>Tangan kiri <em>mengubah jenis</em></h3>
+                <p>Angkat jari untuk warna akornya.</p>
+                <div class="chip-baris">
+                  <span class="chip kiri"><i>✊</i>mayor</span><span class="chip kiri"><i>1</i>minor</span><span class="chip kiri"><i>2</i>7</span><span class="chip kiri"><i>3</i>sus4</span><span class="chip kiri"><i>4</i>maj7</span><span class="chip kiri"><i>5</i>add9</span>
+                </div>
+              </li>
+              <li>
+                <span class="langkah-no">3</span>
+                <h3>Cukup satu tangan?</h3>
+                <p>Tanpa tangan kiri, jenis akor otomatis mengikuti kunci lagu. Tanpa kamera pun bisa: tekan <span class="tak-putus"><kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> <kbd>F</kbd> <kbd>G</kbd>.</span></p>
+              </li>
+            </ol>
+            <div class="aksi">
+              <button id="tombol-mulai" class="tombol utama">Nyalakan kamera &amp; suara</button>
+              <button id="tombol-tanpa-kamera" class="tombol">Main tanpa kamera</button>
+            </div>
+            <p class="privasi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1zm2 0h6V7a3 3 0 0 0-6 0v3z" fill="currentColor"/></svg>Semua diproses di perangkatmu. Video kamera tidak dikirim ke mana pun.</p>
+            <p class="galat" id="galat" hidden></p>
+          </div>
+        </div>
+      </div>
+      <div class="pad" id="pad" aria-label="Pad akor (bisa diketuk)"></div>
+      <section class="lembar" id="lembar" hidden aria-label="Lembar akor lagu" data-lipat="lembar">
+        <div class="lembar-kepala kepala-kartu">
+          <h3 id="judul-lagu"></h3>
+          <span class="redup" id="info-lagu"></span>
+          <button type="button" class="tombol kecil-tombol" id="pakai-saran" hidden title="Pasang tempo, gaya iringan, dan isian yang cocok untuk lagu ini">✦ Pakai saran iringan</button>
+          <span class="aksi-koleksi" id="aksi-koleksi" hidden>
+            <button type="button" class="tombol kecil-tombol" id="simpan-pengaturan" title="Simpan capo, tuning, kunci, tempo, gaya iringan, isian & ejaan untuk sheet ini">💾 Simpan pengaturan</button>
+            <button type="button" class="tombol kecil-tombol" id="edit-sheet">✎ Edit</button>
+            <button type="button" class="tombol kecil-tombol" id="hapus-sheet">Hapus</button>
+          </span>
+        </div>
+        <div class="lembar-isi" id="lembar-isi"></div>
+      </section>
+    </section>
+
+    <aside class="panel">
+      <p class="peringatan" id="peringatan-audio" role="status" hidden></p>
+      <div class="akor-kini" aria-live="polite">
+        <div class="akor-besar" id="akor-besar"><span class="akor-kosong" aria-label="belum ada akor">♪</span></div>
+        <div class="akor-sub" id="akor-sub">Keluarkan jari, atau ketuk pad di bawah</div>
+        <div class="ketukan" id="ketukan" hidden aria-hidden="true"></div>
+        <div class="isian-kini" id="isian-kini" hidden></div>
+        <button type="button" class="tombol kecil-tombol" id="panjang-siap" aria-pressed="false" title="Petikan berikutnya jadi satu genjreng pelan yang dibiarkan bergaung (klimaks). Pola yang sedang jalan otomatis dijeda.">✦ Genjreng panjang <kbd>Shift+akor</kbd></button>
+        <div class="kendali-pola" id="kendali-pola" hidden>
+          <button type="button" class="tombol kecil-tombol" id="jeda-pola" aria-pressed="false">⏸ Jeda <kbd>tahan Spasi</kbd></button>
+          <button type="button" class="tombol kecil-tombol" id="stop-pola">■ Stop <kbd>Esc</kbd></button>
+        </div>
+      </div>
+
+      <div class="tab-panel" role="tablist" aria-label="Isi panel">
+        <button type="button" role="tab" id="tab-main" data-tab="main" aria-controls="isi-main">Main</button>
+        <button type="button" role="tab" id="tab-lagu" data-tab="lagu" aria-controls="isi-lagu">Lagu</button>
+        <button type="button" role="tab" id="tab-suara" data-tab="suara" aria-controls="isi-suara">Suara</button>
+        <button type="button" role="tab" id="tab-kontrol" data-tab="kontrol" aria-controls="isi-kontrol">Kontrol</button>
+      </div>
+
+      <div class="isi-tab" id="isi-main" data-isi="main" role="tabpanel" aria-labelledby="tab-main">
+        <div class="kosong-tab">
+          <span class="kosong-ikon" data-ikon="gitar" aria-hidden="true"></span>
+          <p class="kosong-judul">Belum ada akor yang dimainkan</p>
+          <p>Ketuk pad, tekan <span class="tak-putus"><kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> <kbd>F</kbd> <kbd>G</kbd></span>, atau tunjukkan jari ke kamera. Cara memainkannya di gitar, piano, dan keyboard akan muncul di sini.</p>
+          <p class="kosong-saran">Ingin mengiringi lagu? Pilih lagunya di tab <b>Lagu</b>.</p>
+        </div>
+        <div class="kartu cara-main" id="cara-main" hidden aria-live="polite" data-lipat="cara-main">
+          <h3 class="kepala-kartu">Cara main <span class="redup" id="cara-nama"></span></h3>
+          <div class="cara-isi" id="cara-kini" hidden>
+            <div class="cara-diagram" id="cara-diagram"></div>
+            <ul class="cara-langkah" id="cara-langkah"></ul>
+          </div>
+          <div class="cara-berikut" id="cara-berikut" hidden>
+            <h4><span class="cara-sebut">Berikutnya</span> <b id="berikut-nama"></b> <span class="redup" id="berikut-info"></span></h4>
+            <div class="cara-isi">
+              <div class="cara-diagram kecil" id="berikut-diagram"></div>
+              <ul class="cara-langkah" id="berikut-langkah"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="isi-tab" id="isi-lagu" data-isi="lagu" role="tabpanel" aria-labelledby="tab-lagu" hidden>
+        <div class="kartu" data-lipat="pilih-lagu">
+          <h3 class="kepala-kartu">Lagu <span class="redup" id="ringkas-latihan"></span></h3>
+          <label class="isian">Mainkan
+            <select id="progresi" aria-label="Pilih progresi atau lagu"><option value="">Main bebas, tanpa lagu</option></select>
+          </label>
+          <div class="baris-tempel">
+            <button type="button" class="tombol" id="tombol-tempel" aria-expanded="false" aria-controls="kotak-tempel">+ Tempel sheet sendiri</button>
+          </div>
+          <div class="kotak-tempel" id="kotak-tempel" hidden>
+            <label class="isian">Judul
+              <input type="text" id="judul-tempel" maxlength="80" autocomplete="off" placeholder="contoh: Lagu ibadah Minggu">
+            </label>
+            <label class="isian">Akor dan lirik
+              <textarea id="teks-tempel" rows="10" spellcheck="false" placeholder="Contoh:&#10;[Verse]&#10;C        G&#10;baris lirik pertama&#10;Am       F&#10;baris lirik kedua&#10;&#10;Format [C]lirik dan | C | G | juga bisa."></textarea>
+            </label>
+            <button type="button" class="tombol utama" id="pakai-tempel">Simpan &amp; pakai sheet ini</button>
+            <p class="kecil">Sheet hanya disimpan di browser ini. Kalau di bagian atasnya ada Tuning, Capo, atau Key, semuanya ikut terbaca.</p>
+          </div>
+          <div class="baris-koleksi">
+            <span class="kecil" id="info-koleksi"></span>
+            <button type="button" class="tombol kecil-tombol tombol-teks" id="ekspor-koleksi">Ekspor</button>
+            <button type="button" class="tombol kecil-tombol tombol-teks" id="impor-koleksi">Impor</button>
+            <input type="file" id="berkas-impor" accept="application/json,.json" hidden>
+          </div>
+        </div>
+
+        <div class="kartu latihan" id="latihan" hidden data-lipat="latihan">
+          <h3 class="kepala-kartu">Latihan <span class="redup" id="ringkas-skor"></span></h3>
+          <div class="target" id="target"></div>
+          <div class="kemajuan" aria-hidden="true"><span id="kemajuan-isi"></span></div>
+          <div class="urutan" id="urutan"></div>
+          <div class="skor" id="skor"></div>
+          <label class="saklar ikuti"><input type="checkbox" role="switch" id="ikuti-sheet" checked>
+            <span><b id="label-ikuti">Ikuti sheet</b><small class="redup" id="ket-ikuti">Akor berikutnya disorot dan skor dihitung. Matikan kalau mau main bebas sambil melihat sheet.</small></span></label>
+          <div class="baris-putar">
+            <button type="button" class="tombol" id="putar-contoh" aria-pressed="false">▶ Putar contoh</button>
+            <label class="isian">Ketuk per akor
+              <select id="ketuk-per-akor"><option value="1">1</option><option value="2">2</option><option value="3">3 (lagu 3/4)</option><option value="4" selected>4</option></select>
+            </label>
+          </div>
+          <p class="kecil">Putar contoh memainkan akornya dari awal dengan pola dan tempo yang sedang dipilih. Skor tidak dihitung.</p>
+        </div>
+      </div>
+
+      <div class="isi-tab" id="isi-suara" data-isi="suara" role="tabpanel" aria-labelledby="tab-suara" hidden>
+        <div class="kartu" data-lipat="instrumen">
+          <h3 class="kepala-kartu">Alat musik <span class="redup" id="ringkas-instrumen"></span></h3>
+          <div class="segmen segmen-penuh segmen-besar" role="group" aria-label="Instrumen">
+            <button type="button" data-inst="gitar" aria-pressed="true">Gitar</button>
+            <button type="button" data-inst="piano" aria-pressed="false">Piano</button>
+          </div>
+          <div class="baris">
+            <label class="isian" id="label-jenis-gitar">Jenis gitar
+              <select id="jenis-gitar">
+                <option value="nilon">Nilon, hangat</option>
+                <option value="baja">Akustik baja, cerah</option>
+              </select>
+            </label>
+            <label class="isian">Petikan
+              <select id="sentuhan">
+                <option value="0.45">Pelan</option>
+                <option value="0.75">Sedang</option>
+                <option value="1">Keras</option>
+              </select>
+            </label>
+          </div>
+          <label class="isian isian-geser">Volume
+            <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8">
+          </label>
+        </div>
+
+        <div class="kartu" data-lipat="irama">
+          <h3 class="kepala-kartu">Irama <span class="redup" id="ringkas-irama"></span></h3>
+          <label class="isian"><span id="label-pola">Pola genjreng</span>
+            <select id="pola"></select>
+          </label>
+          <div class="editor-pola" id="editor-pola" hidden>
+            <div class="baris">
+              <label class="isian">Resolusi
+                <select id="resolusi-pola"><option value="2">1/8 (1 &amp; 2 &amp;)</option><option value="4">1/16 (1 e &amp; a)</option></select>
+              </label>
+              <label class="isian">Birama
+                <select id="birama-pola"><option value="4">4/4</option><option value="3">3/4</option></select>
+              </label>
+            </div>
+            <div class="grid-pola" id="grid-pola" aria-label="Kotak pola genjreng"></div>
+            <label class="isian">Ketik pola
+              <input type="text" id="teks-pola" spellcheck="false" autocomplete="off" placeholder="contoh: D DU UDU">
+            </label>
+            <p class="kecil">Klik kotak untuk mengganti isinya: kosong, turun ↓, naik ↑, atau redam ×. Bisa juga diketik, misalnya <code>D DU UDU</code>. Spasi berarti diam, x berarti redam.</p>
+          </div>
+          <div class="editor-pola editor-tab" id="editor-tab" hidden>
+            <div class="baris">
+              <label class="isian">Muat dari pola
+                <select id="muat-tab"><option value="">Pilih pola petik…</option></select>
+              </label>
+              <label class="isian">Resolusi
+                <select id="resolusi-tab"><option value="2">1/8</option><option value="4">1/16</option></select>
+              </label>
+              <label class="isian">Birama
+                <select id="birama-tab"><option value="4">4/4</option><option value="3">3/4</option></select>
+              </label>
+            </div>
+            <div class="grid-tab" id="grid-tab" aria-label="Tab petik 6 senar"></div>
+            <label class="isian">Ketik tab
+              <input type="text" id="teks-tab" spellcheck="false" autocomplete="off" placeholder="contoh: 61 3 4 2 6 3 4 2">
+            </label>
+            <p class="kecil">Klik kotak untuk memetik senar di ketukan itu. Beberapa kotak dalam satu kolom dipetik bersamaan. Kalau diketik, angka adalah nomor senar (1 untuk e tinggi, 6 untuk E rendah) dan titik berarti diam. Nadanya mengikuti bentuk akor di Cara main.</p>
+          </div>
+          <label class="isian isian-geser">Tempo <span id="label-tempo">90 bpm</span>
+            <input type="range" id="tempo" min="50" max="180" step="1" value="90">
+          </label>
+          <div class="baris" id="pengaturan-isian">
+            <label class="isian"><span id="label-isian">Isian antar akor</span>
+              <select id="isian-piano"></select>
+            </label>
+            <label class="isian">Muncul
+              <select id="isian-tiap">
+                <option value="1">Setiap birama</option>
+                <option value="2">Setiap 2 birama</option>
+                <option value="kalimat">Hanya di akhir baris lagu</option>
+              </select>
+            </label>
+            <p class="kecil" id="petunjuk-isian">Isian dimainkan di ujung birama, jadi beri tiap akor waktu paling tidak satu birama. Pilihan per genre memainkan isian kecil, sedang, kecil, lalu besar dalam siklus empat birama.</p>
+          </div>
+        </div>
+
+        <div class="kartu" data-lipat="tuning">
+          <h3 class="kepala-kartu">Kunci, tuning &amp; capo <span class="redup" id="ringkas-bunyi"></span></h3>
+          <div class="baris">
+            <label class="isian">Kunci yang dipegang
+              <select id="kunci"></select>
+            </label>
+            <label class="isian">Tulisan nada
+              <select id="ejaan">
+                <option value="otomatis">Otomatis</option>
+                <option value="kres">Kres: C#, F#</option>
+                <option value="mol">Mol: Db, Gb</option>
+              </select>
+            </label>
+          </div>
+          <label class="isian">Tuning
+            <select id="tuning"></select>
+          </label>
+          <div class="baris">
+            <label class="isian">Capo
+              <select id="capo"></select>
+            </label>
+            <label class="isian">Kunci yang terdengar
+              <select id="kunci-terdengar"></select>
+            </label>
+          </div>
+          <p class="kecil">Akor di pad dan sheet adalah bentuk jari yang kamu pegang. Capo menaikkan bunyinya, misalnya bentuk G dengan capo 3 terdengar B♭. Kalau sheet yang kamu tempel menyebut tuning, capo, atau key, semuanya terisi sendiri.</p>
+        </div>
+      </div>
+
+      <div class="isi-tab" id="isi-kontrol" data-isi="kontrol" role="tabpanel" aria-labelledby="tab-kontrol" hidden>
+        <div class="kartu" data-lipat="kamera">
+          <h3 class="kepala-kartu">Cara memilih akor <span class="redup" id="ringkas-kamera"></span></h3>
+          <div class="pilihan-mode" role="group" aria-label="Cara memilih akor di kamera" id="mode-kamera">
+            <button type="button" data-mode="bentuk" aria-pressed="false"><b>Bentuk jari</b><span>Kepalkan tangan, lalu keluarkan jari. Paling mudah dibaca kamera.</span></button>
+            <button type="button" data-mode="kombinasi" aria-pressed="false"><b>Kombinasi jari</b><span>Tekuk satu jari, atau sentuhkan ujung jempol ke jari lain.</span></button>
+            <button type="button" data-mode="tinggi" aria-pressed="false"><b>Tinggi tangan</b><span>Naik turunkan tangan untuk pindah baris, lalu tekuk satu jari.</span></button>
+            <button type="button" data-mode="utama" aria-pressed="false"><b>Lima akor saja</b><span>Kamera hanya membaca akor utama. Sisanya lewat pad atau keyboard.</span></button>
+          </div>
+          <div class="peta-mode" id="info-mode-kamera"></div>
+        </div>
+
+        <div class="kartu" data-lipat="tangan-kiri">
+          <h3 class="kepala-kartu">Tangan kiri <span class="redup" id="kiri-kini">tidak terlihat</span></h3>
+          <p class="kecil">Jumlah jari kiri yang diangkat mengubah jenis akor.</p>
+          <ul class="panduan" id="panduan-kiri"></ul>
+        </div>
+
+        <details class="kartu">
+          <summary>Pintasan keyboard</summary>
+          <dl class="pintasan">
+            <dt><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><kbd>F</kbd><kbd>G</kbd></dt><dd>Lima akor utama</dd>
+            <dt><kbd>Q</kbd>–<kbd>T</kbd> dan <kbd>Z</kbd>–<kbd>B</kbd></dt><dd>Akor baris atas dan bawah</dd>
+            <dt>tahan <kbd>0</kbd>–<kbd>5</kbd></dt><dd>Ganti jenis akor, sama seperti jari kiri. Contoh: tahan <kbd>2</kbd> lalu tekan <span class="tak-putus"><kbd>D</kbd> untuk G7.</span></dd>
+            <dt><kbd>Shift</kbd> + huruf</dt><dd>Genjreng panjang yang dibiarkan bergaung</dd>
+            <dt>tahan <kbd>Spasi</kbd></dt><dd>Jeda. Lepas untuk lanjut tepat di ketukan.</dd>
+            <dt><kbd>Esc</kbd></dt><dd>Berhenti</dd>
+          </dl>
+          <p class="kecil">Di kamera, mengepalkan tangan kanan juga berarti jeda, kecuali di mode Bentuk jari (di sana kepalan berarti menahan akor).</p>
+        </details>
+
+        <details class="kartu">
+          <summary>Kecepatan respons</summary>
+          <dl class="statistik" id="statistik"></dl>
+          <p class="kecil">Kalau totalnya di bawah sekitar 80 ms, rasanya seperti main alat sungguhan. Headphone Bluetooth biasanya menambah 150–250 ms.</p>
+        </details>
+      </div>
+    </aside>
+  </main>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

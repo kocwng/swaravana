@@ -1,0 +1,21 @@
+{
+  "name": "swaravana",
+  "version": "1.0.0",
+  "description": "Main gitar dan piano cukup dengan jari di depan kamera: tangan kanan memilih akor, tangan kiri mengubah jenisnya. Jalan offline.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/",
+    "siapkan-model": "node scripts/siapkan-model.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kocwng/swaravana.git"
+  },
+  "homepage": "https://swaravana.kusumalab.host"
+}
