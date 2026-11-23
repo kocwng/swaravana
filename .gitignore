@@ -1,0 +1,28 @@
+# Hasil build rilis lokal (zip dibuat ulang oleh scripts/buat-rilis.mjs / workflow Rilis)
+dist/
+_site/
+*.zip
+*.zip.sha256
+
+# Contoh suara sebelum/sesudah (WAV ±7,4 MB). Tidak dipakai aplikasi.
+contoh-suara/
+
+# Rahasia & konfigurasi lokal (aplikasi ini tidak butuh satu pun)
+.env
+.env.*
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+
+# Sisa sistem operasi & editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+.claude/settings.local.json
+
+# Node (tidak ada dependency, tapi jaga-jaga)
+node_modules/
+npm-debug.log*

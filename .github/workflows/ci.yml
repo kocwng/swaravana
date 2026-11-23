@@ -1,0 +1,23 @@
+# Tes untuk setiap pull request dan push ke main (sebelum di-merge ke deploy).
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  tes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - name: Tes unit
+        run: node --test test/
+      - name: Cek offline
+        run: node scripts/cek-offline.mjs

@@ -1,0 +1,68 @@
+# Deploy folder public/ ke GitHub Pages setiap ada push ke branch `deploy`.
+# Alur: branch kerja → merge ke main (CI jalan) → merge main ke deploy (situs ter-update).
+# Settings → Pages → Source harus "GitHub Actions", dan environment github-pages harus
+# mengizinkan branch `deploy`. Domain kustom diatur di Settings → Pages → Custom domain.
+name: Pages
+
+on:
+  push:
+    branches: [deploy]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Hanya satu deploy Pages berjalan sekaligus. Deploy yang sedang jalan tidak dibatalkan,
+# supaya situs tidak tertinggal setengah ter-update.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  tes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - name: Tes unit
+        run: node --test test/
+      - name: Cek offline
+        run: node scripts/cek-offline.mjs
+
+  build:
+    needs: tes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read # configure-pages hanya membaca info situs Pages
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/configure-pages@v5
+      - name: Susun isi situs
+        run: |
+          cp -R public _site
+          # Atribusi MediaPipe ikut dipublikasikan bersama file vendor-nya (Apache-2.0).
+          mkdir -p _site/lisensi
+          cp NOTICE _site/lisensi/NOTICE.txt
+          cp THIRD_PARTY_NOTICES.md _site/lisensi/THIRD_PARTY_NOTICES.txt
+          cp docs/lisensi/Apache-2.0.txt _site/lisensi/Apache-2.0.txt
+          cp LICENSE _site/lisensi/LICENSE.txt
+          find _site -name .DS_Store -delete
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
