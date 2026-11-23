@@ -176,6 +176,8 @@
           <div class="kemajuan" aria-hidden="true"><span id="kemajuan-isi"></span></div>
           <div class="urutan" id="urutan"></div>
           <div class="skor" id="skor"></div>
+          <label class="saklar ikuti saklar-pemula"><input type="checkbox" role="switch" id="mode-pemula" aria-describedby="ket-pemula">
+            <span><b>Mode pemula</b><small class="redup" id="ket-pemula">Pad cuma berisi akor dari sheet ini. Tangan kiri tidak perlu dipakai.</small></span></label>
           <label class="saklar ikuti"><input type="checkbox" role="switch" id="ikuti-sheet" checked>
             <span><b id="label-ikuti">Ikuti sheet</b><small class="redup" id="ket-ikuti">Akor berikutnya disorot dan skor dihitung. Matikan kalau mau main bebas sambil melihat sheet.</small></span></label>
           <div class="baris-putar">
@@ -312,7 +314,7 @@
           <div class="peta-mode" id="info-mode-kamera"></div>
         </div>
 
-        <div class="kartu" data-lipat="tangan-kiri">
+        <div class="kartu" id="kartu-kiri" data-lipat="tangan-kiri">
           <h3 class="kepala-kartu">Tangan kiri <span class="redup" id="kiri-kini">tidak terlihat</span></h3>
           <p class="kecil">Jumlah jari kiri yang diangkat mengubah jenis akor.</p>
           <ul class="panduan" id="panduan-kiri"></ul>
