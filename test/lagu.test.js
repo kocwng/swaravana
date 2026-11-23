@@ -181,3 +181,18 @@ test('lagu rohani domain publik: ≥9 lagu, akor saja, saran iringan valid', () 
     }
   }
 });
+
+test('bacaAkor: penulisan akhiran ala situs lain (Maj7, Min, Sus4, kurung)', () => {
+  for (const t of ['FMaj7', 'FMAJ7', 'Fmaj7', 'FM7', 'C(maj7)', 'FMaj7/A']) assert.equal(bacaAkor(t).kualitas, 'maj7', t);
+  assert.equal(bacaAkor('FMaj7').tepat, true);
+  assert.equal(bacaAkor('Fm7').kualitas, 'm7');
+  assert.equal(bacaAkor('Cmin7').kualitas, 'm7');
+  assert.equal(bacaAkor('Cmin').kualitas, 'minor');
+  assert.equal(bacaAkor('CMaj').kualitas, 'mayor');
+  assert.equal(bacaAkor('DSus4').kualitas, 'sus4');
+  assert.equal(bacaAkor('Cadd2').kualitas, 'add9');
+  assert.equal(bacaAkor('Am(add9)').kualitas, 'madd9');
+  assert.equal(bacaAkor('Cm(maj7)').kualitas, 'minor');
+  assert.equal(bacaAkor('G7b9').kualitas, 'dom7');
+  assert.ok(barisAkor('FMaj7       G          C'));
+});
