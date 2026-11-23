@@ -21,11 +21,14 @@ const JENIS = [
   [/^add9$/, 'add9', true],
   [/^(madd9|m\(add9\))$/, 'madd9', true],
   [/^sus2$/, 'add9', false],
+  [/^2$/, 'add9', false],
   [/^(9|11|13)$/, 'dom7', false],
-  [/^(maj9|M9)$/, 'maj7', false],
-  [/^(m9|m11)$/, 'm7', false],
+  [/^7[b#+-]\d+$/, 'dom7', false],
+  [/^(maj9|M9|maj13|M13|maj7[#+]11)$/, 'maj7', false],
+  [/^(m9|m11|m13)$/, 'm7', false],
+  [/^add11$/, 'mayor', false],
   [/^(6|69|6\/9|5)$/, 'mayor', false],
-  [/^(m6|mM7)$/, 'minor', false],
+  [/^(m6|mM7|mmaj7)$/, 'minor', false],
   [/^(dim7?|°7?|o7?|m7b5|ø7?)$/, 'minor', false],
   [/^(aug|\+)$/, 'mayor', false],
 ];
@@ -43,8 +46,24 @@ export function bacaAkor(teks) {
   const akar = (AKAR[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0) + 12) % 12;
   // Akor slash (G/B): nada bas disimpan dan ikut dimainkan, jadi tetap dihitung tepat.
   const bas = m[4] ? (AKAR[m[4][0]] + (m[4][1] === '#' ? 1 : m[4][1] === 'b' ? -1 : 0) + 12) % 12 : null;
-  for (const [re, kualitas, tepat] of JENIS) if (re.test(m[3])) return { akar, kualitas, tepat, asli: m[0], bas };
+  const akhiran = rapikanAkhiran(m[3]);
+  for (const [re, kualitas, tepat] of JENIS) if (re.test(akhiran)) return { akar, kualitas, tepat, asli: m[0], bas };
   return null;
+}
+
+/**
+ * Samakan penulisan akhiran dari berbagai situs: "Maj7"/"MAJ7" → "maj7", "Min7" → "m7",
+ * "Sus4" → "sus4", "Add9"/"add2" → "add9", "(maj7)" → "maj7". "M" tunggal tetap besar karena
+ * "M7" (maj7) beda dengan "m7".
+ */
+function rapikanAkhiran(s) {
+  return s
+    .replace(/[()]/g, '')
+    .replace(/maj|min|sus|add|dim|aug/gi, (x) => x.toLowerCase())
+    .replace(/^min(?=\d|$)/, 'm')
+    .replace(/^maj$/, '')
+    .replace(/^M$/, '')
+    .replace(/add2$/, 'add9');
 }
 
 /** Jumlah jari kiri yang menghasilkan `kualitas` pada jari dengan kualitas asli `asli`. */

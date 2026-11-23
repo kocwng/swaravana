@@ -1,6 +1,6 @@
 // Service worker: simpan semua aset (termasuk model MediaPipe ±19 MB) agar aplikasi
 // tetap terbuka dan bisa dimainkan walau server dimatikan.
-const VERSI = 'swaravana-v60';
+const VERSI = 'swaravana-v61';
 const ASET = [
   '/', '/index.html', '/style.css', '/manifest.webmanifest', '/ikon.svg', '/brand/ikon-192.png', '/brand/ikon-512.png', '/brand/ikon-maskable-512.png', '/brand/apple-touch-icon.png',
   '/js/app.js', '/js/teori.js', '/js/gestur.js', '/js/sintesis.js', '/js/suara.js', '/js/pelacak.js', '/js/lagu.js', '/js/pola.js', '/js/pemutar.js', '/js/diagram.js', '/js/gambar-diagram.js', '/js/koleksi.js',
