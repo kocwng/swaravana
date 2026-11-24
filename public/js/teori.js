@@ -86,10 +86,10 @@ export const BENTUK = {
   bawah: [[1, 2, 4], [0, 1, 2, 3], [0, 1], [1, 4], [0, 4]],
 };
 const NAMA_BENTUK = {
-  '1': '☝️ telunjuk', '1-2': '✌️ 2 jari', '1-2-3': '3 jari', '1-2-3-4': '4 jari', '0-1-2-3-4': '🖐️ 5 jari',
-  '0': '👍 jempol', '4': 'kelingking', '0-1-4': '🤟 jempol + telunjuk + kelingking', '2-3-4': 'tengah + manis + kelingking',
+  '1': 'telunjuk', '1-2': '2 jari', '1-2-3': '3 jari', '1-2-3-4': '4 jari', '0-1-2-3-4': '5 jari',
+  '0': 'jempol', '4': 'kelingking', '0-1-4': 'jempol + telunjuk + kelingking', '2-3-4': 'tengah + manis + kelingking',
   '0-1-2': 'jempol + telunjuk + tengah', '1-2-4': 'telunjuk + tengah + kelingking', '0-1-2-3': 'semua kecuali kelingking',
-  '0-1': 'jempol + telunjuk, bentuk L', '1-4': '🤘 telunjuk + kelingking', '0-4': '🤙 jempol + kelingking',
+  '0-1': 'jempol + telunjuk, bentuk L', '1-4': 'telunjuk + kelingking', '0-4': 'jempol + kelingking',
 };
 const KUNCI_BENTUK = new Map();
 for (const baris of NAMA_BARIS) BENTUK[baris].forEach((j, jari) => KUNCI_BENTUK.set(j.join('-'), { baris, jari }));
@@ -104,7 +104,7 @@ export function jariBentuk(baris, jari) {
   return BENTUK[baris]?.[jari] ?? [jari];
 }
 
-/** Nama bentuk untuk ditampilkan, mis. "✌️ 2 jari". */
+/** Nama bentuk untuk ditampilkan, mis. "2 jari". Gambarnya lewat glyphJari(jariBentuk(...)). */
 export function teksBentuk(baris, jari) {
   return NAMA_BENTUK[jariBentuk(baris, jari).join('-')];
 }
@@ -129,12 +129,12 @@ export const KUALITAS = {
 /** Label untuk panduan tangan kiri (jumlah jari terangkat → jenis). */
 export const PANDUAN_KIRI = [
   { jari: null, label: 'Ikut kunci lagu' },
-  { jari: 0, label: 'Mayor' },
-  { jari: 1, label: 'Minor' },
+  { jari: 0, label: 'mayor' },
+  { jari: 1, label: 'minor' },
   { jari: 2, label: '7' },
-  { jari: 3, label: 'Sus4' },
-  { jari: 4, label: 'Maj7 / m7' },
-  { jari: 5, label: 'Add9' },
+  { jari: 3, label: 'sus4' },
+  { jari: 4, label: 'maj7 / m7' },
+  { jari: 5, label: 'add9' },
 ];
 
 /**
