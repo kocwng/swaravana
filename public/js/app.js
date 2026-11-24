@@ -10,6 +10,7 @@ import { svgGitar, svgPiano } from './gambar-diagram.js';
 import { Koleksi } from './koleksi.js';
 import { bentukGitar, SENAR_STANDAR } from './diagram.js';
 import { susunPemula } from './pemula.js';
+import { glyphJari, ikon } from './glyph.js';
 
 const $ = (id) => document.getElementById(id);
 /** Perangkat sentuh (HP/tablet): petunjuk keyboard diganti "ketuk pad". Fungsi, supaya ikut berubah bila perangkat berganti mode. */
@@ -265,7 +266,7 @@ function gambarEditorPola() {
     b.type = 'button';
     b.className = `kotak${i % p.resolusi === 0 && i > 0 ? ' awal-ketuk' : ''}`;
     b.dataset.isi = isi;
-    b.title = `Ketuk ${hitung[i] || '·'}: klik untuk mengganti`;
+    b.title = `Ketukan ${hitung[i] || '·'}: klik untuk mengganti`;
     b.innerHTML = `<b>${labelLangkah(isi)}</b><small>${hitung[i]}</small>`;
     b.addEventListener('click', () => {
       const berikut = SIKLUS_KOTAK[(SIKLUS_KOTAK.indexOf(isi) + 1) % SIKLUS_KOTAK.length];
@@ -327,7 +328,7 @@ function gambarEditorTab() {
       b.type = 'button';
       b.className = `sel${langkah.includes(senar) ? ' aktif' : ''}${i % resolusi === 0 && i > 0 ? ' awal-ketuk' : ''}`;
       b.dataset.i = i;
-      b.title = `Senar ${senar} (${NAMA_SENAR[senar]}) · ketuk ${hitung[i] || '·'}`;
+      b.title = `Senar ${senar} (${NAMA_SENAR[senar]}) · ketukan ${hitung[i] || '·'}`;
       b.addEventListener('click', () => {
         const baru = tab.map((x) => [...x]);
         baru[i] = langkah.includes(senar) ? langkah.filter((k) => k !== senar) : [...langkah, senar].sort((a, b2) => b2 - a);
@@ -429,7 +430,7 @@ pilihIsianTiap.addEventListener('change', () => {
 });
 const namaMidi = (m) => `${['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][m % 12]}`;
 // tampilkan isian yang sedang berbunyi (nama + nadanya), tepat saat terdengar
-const LABEL_UKURAN = { kecil: 'kecil', sedang: 'sedang', besar: 'BESAR' };
+const LABEL_UKURAN = { kecil: 'kecil', sedang: 'sedang', besar: 'besar' };
 pemutar.onIsian = (nama, nada, tAudio, isian) => {
   const tunda = Math.max(0, (tAudio - suara.ctx.currentTime) * 1000);
   const genre = isian?.genre ? `${isian.genre}: ` : '';
@@ -444,7 +445,7 @@ const tombolPanjang = document.getElementById('panjang-siap');
 function aturPanjangSiap(siap) {
   keadaan.panjangSiap = siap;
   tombolPanjang.setAttribute('aria-pressed', String(siap));
-  tombolPanjang.firstChild.textContent = siap ? '✦ Siap: petik sekali untuk klimaks ' : '✦ Genjreng panjang ';
+  tombolPanjang.firstChild.textContent = siap ? 'Siap, petikan berikutnya bergaung panjang ' : 'Genjreng panjang ';
 }
 tombolPanjang.addEventListener('click', () => aturPanjangSiap(!keadaan.panjangSiap));
 const tombolJeda = document.getElementById('jeda-pola');
@@ -476,7 +477,7 @@ function perbaruiKetukan() {
   if (!jalan || pemutar.isianAktif === 'mati') isianKini.hidden = true;
   ketukan.classList.toggle('dijeda', jalan && pemutar.jeda);
   tombolJeda.setAttribute('aria-pressed', String(jalan && pemutar.jeda));
-  tombolJeda.firstChild.textContent = pemutar.jeda ? '▶ Lanjut ' : '⏸ Jeda ';
+  tombolJeda.querySelector('.label-jeda').innerHTML = pemutar.jeda ? `${ikon('putar')}Lanjut` : `${ikon('jeda')}Jeda`;
   const kini = jalan ? pemutar.langkahKini() : -1;
   if (kini === langkahTampil) return;
   langkahTampil = kini;
@@ -489,7 +490,7 @@ function perbaruiKetukan() {
 PANDUAN_KIRI.forEach((p) => {
   const li = document.createElement('li');
   li.dataset.jari = p.jari ?? 'auto';
-  li.innerHTML = `<span class="jml">${p.jari === null ? '–' : p.jari === 0 ? '✊' : p.jari}</span><span>${p.label}</span>`;
+  li.innerHTML = `<span class="jml">${p.jari === null ? '–' : p.jari === 0 ? glyphJari([]) : p.jari}</span><span>${p.label}</span>`;
   li.title = p.jari === null ? 'Tangan kiri tidak terlihat' : p.jari === 0 ? 'Tangan kiri mengepal' : `${p.jari} jari kiri diangkat`;
   el.panduan.append(li);
 });
@@ -525,10 +526,10 @@ function isiKoleksi() {
   grupKoleksi.replaceChildren(...daftar.map((x) => {
     const o = document.createElement('option');
     o.value = `s:${x.id}`;
-    o.textContent = `${x.judul}${x.pengaturan ? ' · ⚙' : ''}`;
+    o.textContent = `${x.judul}${x.pengaturan ? ' · dengan pengaturan' : ''}`;
     return o;
   }));
-  document.getElementById('info-koleksi').textContent = daftar.length ? `${daftar.length} sheet tersimpan` : 'Belum ada sheet tersimpan.';
+  document.getElementById('info-koleksi').textContent = daftar.length ? `${daftar.length} sheet tersimpan` : 'Belum ada sheet tersimpan';
   document.getElementById('ekspor-koleksi').disabled = !daftar.length;
 }
 isiKoleksi();
@@ -559,7 +560,7 @@ function aturTombolTempel() {
   tombolTempel.setAttribute('aria-expanded', String(buka));
 }
 document.getElementById('pakai-tempel').addEventListener('click', () => {
-  if (!bacaSheet(teksTempel.value).urutan.length) { el.target.textContent = ''; alertRingan('Tidak ada akor yang dikenali di sheet itu.'); return; }
+  if (!bacaSheet(teksTempel.value).urutan.length) { el.target.textContent = ''; alertRingan('Tidak ada akor yang dikenali di sheet itu'); return; }
   const item = koleksi.simpanSheet({ id: idDiedit, judul: judulTempel.value, teks: teksTempel.value });
   idDiedit = null;
   kotakTempel.hidden = true;
@@ -1043,7 +1044,7 @@ function perbaruiLatihan() {
     return;
   }
   const catatan = !T.tepat ? `<span class="catatan-target">Di sheet tertulis ${T.label}, yang dibunyikan ${T.main}.</span>`
-    : T.bas != null && T.bas !== T.akar ? '<span class="catatan-target">Nada bas slash ikut dibunyikan.</span>' : '';
+    : T.bas != null && T.bas !== T.akar ? '<span class="catatan-target">Nada bas setelah tanda / ikut dibunyikan</span>' : '';
   const sentuh = layarSentuh(); // perangkat sentuh: tanpa petunjuk tombol keyboard
   const tombolKanan = sentuh ? '' : ` <kbd>${TOMBOL_BARIS[T.baris][T.jari]}</kbd>`;
   const tombolKiri = T.kiri === null || sentuh ? '' : ` <kbd>tahan ${T.kiri}</kbd>`;
@@ -1075,8 +1076,8 @@ function perbaruiLatihan() {
     }
   }
   const total = L.benar + L.salah;
-  el.skor.textContent = keadaan.putarOtomatis ? 'Contoh sedang diputar, skor tidak dihitung.'
-    : total ? `Tepat ${L.benar} dari ${total} percobaan (${Math.round((L.benar / total) * 100)}%)` : 'Mainkan akor yang disorot.';
+  el.skor.textContent = keadaan.putarOtomatis ? 'Contoh sedang diputar, skor tidak dihitung'
+    : total ? `Tepat ${L.benar} dari ${total} percobaan (${Math.round((L.benar / total) * 100)}%)` : 'Mainkan akor yang disorot';
   aturKemajuan(L);
   isiNamaPad();
   semuaPad().forEach(([b, j, t]) => {
@@ -1111,14 +1112,14 @@ function isiNamaPad() {
     t.classList.toggle('nama-panjang', nama.length > 5); // ejaan sheet bisa panjang (Dadd9/F#)
     const gerak = mode === 'bentuk' ? teksBentuk(b, j) : mode === 'kombinasi' ? teksKombinasi(b, j) : JARI[j];
     // mode pemula: angka romawi pad biasa tidak berlaku lagi, cukup gerakannya
-    t.querySelector('.jari').textContent = pemula ? gerak : `${gerak}, ${BARIS[b][j].romawi}`;
+    t.querySelector('.jari').innerHTML = `${glyphJari(jariGerak(mode, b, j))}<span>${pemula ? gerak : `${gerak}, ${BARIS[b][j].romawi}`}</span>`;
     t.querySelector('.syarat-kiri').textContent = '';
   });
 }
 
 // ------------------------------------------------------------------ mode kamera
 const INFO_MODE = {
-  bentuk: 'Kepalan berarti diam, akor terakhir tetap ditahan. Untuk jeda, tahan Spasi atau turunkan tangan.',
+  bentuk: 'Kepalan menahan akor terakhir. Untuk jeda, tahan Spasi atau turunkan tangan.',
   kombinasi: 'Tekuk satu jari untuk akor utama, tekuk dua jari bersamaan untuk akor lain. Pasangan dengan jempol cukup disentuhkan ujungnya.',
   tinggi: 'Angkat tangan kanan lebih tinggi untuk baris atas, turunkan untuk baris bawah. Posisi biasa memakai baris utama.',
   utama: 'Cara paling sederhana. Akor di baris atas dan bawah tetap bisa dimainkan lewat keyboard atau pad.',
@@ -1128,12 +1129,13 @@ const INFO_MODE = {
  * jari yang keluar bila tidak ada emoji; mode kombinasi memakai jumlah jari (1 atau 2).
  */
 function ikonPeta(mode, baris, jari, teks) {
-  if (mode === 'bentuk') {
-    const m = teks.match(/^([^\p{L}\p{N}\s]+)\s*(.*)$/u);
-    if (m) return { ikon: m[1], isi: m[2] };
-    return { ikon: String(jariBentuk(baris, jari).length), isi: teks };
-  }
-  return { ikon: String(KOMBINASI[baris][jari].length), isi: teks };
+  return { ikon: glyphJari(jariGerak(mode, baris, jari)), isi: teks };
+}
+/** Jari yang dipakai sebuah posisi pad menurut mode kamera (untuk glyph jari). */
+function jariGerak(mode, baris, jari) {
+  if (mode === 'bentuk') return jariBentuk(baris, jari);
+  if (mode === 'kombinasi') return KOMBINASI[baris][jari];
+  return [jari];
 }
 /** Penjelasan mode + peta gerakan → akor di kunci & tangan kiri saat ini. */
 function isiPetaMode() {
@@ -1184,7 +1186,7 @@ function hentikanPutar() {
   const tadiPutar = keadaan.putarOtomatis;
   keadaan.putarOtomatis = false;
   tombolPutar.setAttribute('aria-pressed', 'false');
-  tombolPutar.textContent = '▶ Putar contoh';
+  tombolPutar.innerHTML = `${ikon('putar')}Putar contoh`;
   if (tadiPutar && keadaan.latihan) perbaruiTampilan(); // kembali ke tampilan mode ikuti/bebas
 }
 
@@ -1194,7 +1196,7 @@ async function mulaiPutar() {
   await pastikanSuara();
   keadaan.putarOtomatis = true;
   tombolPutar.setAttribute('aria-pressed', 'true');
-  tombolPutar.textContent = '■ Berhenti';
+  tombolPutar.innerHTML = `${ikon('stop')}Berhenti`;
   L.i = 0;
   lewatiYangTakBisa();
   let sisa = L.target.filter((t) => t.jari !== null).length;
@@ -1291,7 +1293,7 @@ document.getElementById('simpan-pengaturan').addEventListener('click', (e) => {
   koleksi.simpanPengaturan(id, ambilPengaturan());
   isiKoleksi();
   el.progresi.value = `s:${id}`;
-  el.skor.textContent = 'Pengaturan tersimpan. Capo, kunci, tempo, iringan, dan isian akan terpasang lagi setiap sheet ini dibuka.';
+  el.skor.textContent = 'Pengaturan tersimpan, dipasang lagi setiap sheet ini dibuka';
   keadaan.latihan.info = keadaan.latihan.info.replace(/ \(pengaturan tersimpan\)$/, '') + ' (pengaturan tersimpan)';
   gambarLembar();
 });
@@ -1329,7 +1331,7 @@ berkasImpor.addEventListener('change', async () => {
   try {
     const { ditambah, dilewati } = koleksi.impor(await f.text());
     isiKoleksi();
-    document.getElementById('info-koleksi').textContent = `${ditambah} sheet berhasil masuk${dilewati ? `, ${dilewati} dilewati karena sudah ada atau rusak` : ''}.`;
+    document.getElementById('info-koleksi').textContent = `${ditambah} sheet diimpor${dilewati ? `, ${dilewati} dilewati (sudah ada atau rusak)` : ''}`;
   } catch (err) {
     document.getElementById('info-koleksi').textContent = `Impor gagal: ${err.message}`;
   }
@@ -1563,7 +1565,7 @@ function gambarBentuk(lm, w, h, dpr, T, sekarang, kiri, aksen, aksen2) {
   const kilat = Math.max(0, 1 - umur / 400);
   let teks, latar = 'rgba(20,17,15,.75)', depan = '#fff';
   if (kini === null) teks = '…';
-  else if (!kini.length) teks = '✊ diam (akor ditahan)';
+  else if (!kini.length) teks = 'mengepal, akor ditahan';
   else if (!pos) teks = 'bentuk tidak dipakai';
   else {
     teks = `${teksBentuk(pos.baris, pos.jari)}: ${namaPad(pos.jari, kiri, pos.baris)}`;
@@ -1573,7 +1575,7 @@ function gambarBentuk(lm, w, h, dpr, T, sekarang, kiri, aksen, aksen2) {
   if (T) {
     const q = keLayar(lm[0], w, h);
     const cocok = pos && pos.baris === T.baris && pos.jari === T.jari;
-    pil(q.x, q.y + 30 * dpr, `${cocok ? '✓' : 'berikut'} ${T.main}: ${teksBentuk(T.baris, T.jari)}`, { latar: aksen2, depan: '#06201b', besar: 13 * dpr });
+    pil(q.x, q.y + 30 * dpr, `${cocok ? 'pas' : 'berikut'} ${T.main}: ${teksBentuk(T.baris, T.jari)}`, { latar: aksen2, depan: '#1a1714', besar: 13 * dpr });
   }
 }
 
@@ -1606,20 +1608,21 @@ function gambar() {
       const aktif = b === keadaan.barisKamera && keadaan.tanganAkor;
       ctx.font = `${aktif ? 700 : 600} ${11 * dpr}px system-ui, sans-serif`;
       ctx.fillStyle = aktif ? 'rgba(240,167,74,.9)' : 'rgba(255,255,255,.3)';
-      ctx.fillText(`BARIS ${LABEL_BARIS[b].toUpperCase()}`, w - 12 * dpr, y);
+      ctx.fillText(`Baris ${LABEL_BARIS[b].toLowerCase()}`, w - 12 * dpr, y);
     }
     }
 
-    const aksen = warna('--aksen') || '#f0a74a', aksen2 = warna('--aksen-2') || '#5fc8b4';
+    // overlay di atas video selalu gelap: aksen kedua = putih hangat tetap, tidak ikut tema
+    const aksen = warna('--aksen') || '#f0a74a', aksen2 = '#efe9de';
     const kiri = jumlahKiri();
     const T = targetLatihan();
     const sekarang = performance.now();
 
     if (keadaan.tanganKiri && !pemulaAktif()) {
-      gambarTangan(keadaan.tanganKiri, w, h, { garis: 'rgba(95,200,180,.6)', titik: aksen2 });
+      gambarTangan(keadaan.tanganKiri, w, h, { garis: 'rgba(239,233,222,.5)', titik: aksen2 });
       const q = keLayar(keadaan.tanganKiri[0], w, h);
       const label = kiri === null ? '…' : teksKiri(kiri);
-      pil(q.x, q.y + 26 * dpr, label, { latar: aksen2, depan: '#06201b', besar: 15 * dpr });
+      pil(q.x, q.y + 26 * dpr, label, { latar: aksen2, depan: '#1a1714', besar: 15 * dpr });
     }
     if (keadaan.tanganAkor) {
       gambarTangan(keadaan.tanganAkor, w, h, { garis: 'rgba(255,255,255,.45)', titik: '#fff' });
@@ -1646,11 +1649,11 @@ function gambar() {
       // target latihan ada di baris lain: beri tahu arah gerak tangan
       if (T && T.baris !== 'tengah' && keadaan.modeKamera === 'utama') {
         const q = keLayar(keadaan.tanganAkor[0], w, h);
-        pil(q.x, q.y + 30 * dpr, `${T.main}: ${layarSentuh() ? 'ketuk pad-nya' : `tekan ${TOMBOL_BARIS[T.baris][T.jari]}`} atau pakai mode Kombinasi jari`, { latar: aksen2, depan: '#06201b', besar: 13 * dpr });
+        pil(q.x, q.y + 30 * dpr, `${T.main}: ${layarSentuh() ? 'ketuk pad-nya' : `tekan ${TOMBOL_BARIS[T.baris][T.jari]}`} atau pakai mode Kombinasi jari`, { latar: aksen2, depan: '#1a1714', besar: 13 * dpr });
       } else if (T && T.baris !== keadaan.barisKamera && keadaan.modeKamera === 'tinggi') {
         const q = keLayar(keadaan.tanganAkor[0], w, h);
         const naik = NAMA_BARIS.indexOf(T.baris) < NAMA_BARIS.indexOf(keadaan.barisKamera);
-        pil(q.x, q.y + 30 * dpr, `${naik ? '↑ naikkan' : '↓ turunkan'} tangan ke baris ${LABEL_BARIS[T.baris].toLowerCase()}`, { latar: aksen2, depan: '#06201b', besar: 13 * dpr });
+        pil(q.x, q.y + 30 * dpr, `${naik ? '↑ naikkan' : '↓ turunkan'} tangan ke baris ${LABEL_BARIS[T.baris].toLowerCase()}`, { latar: aksen2, depan: '#1a1714', besar: 13 * dpr });
       }
     }
   }
@@ -1677,7 +1680,7 @@ function tulisStatistik() {
   const peringatan = document.getElementById('peringatan-audio');
   const telat = audio != null && audio > 0.08;
   peringatan.hidden = !telat;
-  if (telat) peringatan.textContent = `Suara keluar ±${Math.round(audio * 1000)} ms terlambat, biasanya karena headphone/speaker Bluetooth. Untuk main, pindahkan output ke speaker bawaan atau headphone kabel lewat menu suara; muat ulang halaman bila angka ini belum turun.`;
+  if (telat) peringatan.textContent = `Suara telat sekitar ${Math.round(audio * 1000)} ms, biasanya karena headphone atau speaker Bluetooth. Pindah ke speaker bawaan atau headphone kabel, lalu muat ulang halaman kalau angkanya belum turun.`;
   el.statistik.replaceChildren(...baris.flatMap(([k, v]) => { const dt = document.createElement('dt'); dt.textContent = k; const dd = document.createElement('dd'); dd.textContent = v; return [dt, dd]; }));
   if (pelacak.aktif) {
     const n = (keadaan.tanganAkor ? 1 : 0) + (keadaan.tanganKiri ? 1 : 0);
@@ -1841,8 +1844,8 @@ function pasangLipat() {
     const atur = (lipat) => {
       kartu.classList.toggle('terlipat', lipat);
       tombol.setAttribute('aria-expanded', String(!lipat));
-      tombol.setAttribute('aria-label', `${lipat ? 'Besarkan' : 'Kecilkan'} kartu ${kepala.firstChild.textContent.trim()}`);
-      tombol.title = lipat ? 'Besarkan' : 'Kecilkan';
+      tombol.setAttribute('aria-label', `${lipat ? 'Buka' : 'Lipat'} kartu ${kepala.firstChild.textContent.trim()}`);
+      tombol.title = lipat ? 'Buka' : 'Lipat';
     };
     atur(localStorageAman(`akor.lipat.${id}`) === '1');
     kepala.addEventListener('click', (e) => {
@@ -1872,7 +1875,7 @@ tulisRingkasan();
 
 // perangkat sentuh: petunjuk awal "tekan A S D F G" diganti "ketuk pad di bawah"
 if (layarSentuh()) {
-  if (!keadaan.latihan) el.akorSub.textContent = 'keluarkan jari tangan kanan, atau ketuk pad di bawah';
+  if (!keadaan.latihan) el.akorSub.textContent = 'Keluarkan jari tangan kanan, atau ketuk pad di bawah';
   const kosong = document.querySelector('.kosong-tab p:not([class])');
   if (kosong) kosong.textContent = 'Ketuk pad di bawah atau tunjukkan jari ke kamera. Cara memainkannya di gitar dan piano akan muncul di sini.';
   const mati = document.querySelector('.teks-mati span');
